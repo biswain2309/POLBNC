@@ -1,49 +1,47 @@
 import pandas as pd
 from pathlib import Path
+# from txt_to_xcl import txt_excel as t
+import txt_to_xcl as t
 
 
-def excel_diff(path_polbnc, path_ref, index_col_pbc, index_col_ref):
+def col_rename(typ_ref, index_col_ref):
 
-    global df_polbnc, dfdiff, cols_polbnc, cols_pol, cols_bil, df_pol, df_bil, newRows, droppedRows, dfdiff
-    df_polbnc = pd.read_excel(path_polbnc, index_col=index_col_pbc).fillna(0)
+    global cols_pol, cols_bil, df_pol, df_bil
 
-    # Perform Diff
-    dfdiff = df_polbnc.copy()
-    cols_polbnc = df_polbnc.columns
-    # print('cols_polbnc type :', cols_polbnc)
-
-    path_temp = str(path_ref)[0:3]
+    path_temp = str(typ_ref)[0:3]
     if path_temp == 'BIL':
-        df_bil = pd.read_excel(path_ref, index_col=index_col_ref).fillna(0)
-        df_bil = df_bil.rename(
+        #df_bil = pd.read_excel(path_ref, index_col=index_col_ref).fillna(0)
+        t.dfbil = t.dfbil.rename(
             columns={
                 "PAYMENT STATUS": "BILLING STATUS",
                 "FREQUENCY": "BILLING FREQUENCY"
             }
         )
-        cols_bil = df_bil.columns
+        cols_bil = t.dfbil.columns
     elif path_temp == 'POL':
-        df_pol = pd.read_excel(path_ref, index_col=index_col_ref).fillna(0)
-        df_pol = df_pol.rename(
+        #df_pol = pd.read_excel(path_ref, index_col=index_col_ref).fillna(0)
+        t.dfpol = t.dfpol.rename(
             columns={
                 "AGE": "ISSUE AGE"
             }
         )
-        cols_pol = df_pol.columns
-    # return cols_polbnc
+        cols_pol = t.dfpol.columns
 
 
-def excel_cmp(cols_polbnc, cols_ref, df_ref, df_polbnc, dfdiff):
+def excel_cmp(cols_polbnc, cols_ref, df_ref, dfdiff, df_polbnc):
 
-#    global df_polbnc, dfdiff, cols_polbnc, cols_pol, cols_bil, df_pol, df_bil, newRows, droppedRows, dfdiff
+    global newRows, droppedRows
     droppedRows = []
     newRows = []
     sharedCols = list(set(cols_polbnc).intersection(cols_ref))
+    print('sharedCols :', sharedCols)
+    print('cols_polbnc: ', cols_polbnc)
+    print('cols_ref: ', cols_ref)
 
     for row in dfdiff.index:
-        if (row in df_polbnc.index) and (row in df_ref.index):
+        if (row in dfdiff.index) and (row in df_ref.index):
             for col in sharedCols:
-                value_polbnc = df_polbnc.loc[row,col]
+                value_polbnc = dfdiff.loc[row,col]
                 value_ref = df_ref.loc[row,col]
                 if value_polbnc==value_ref:
                     dfdiff.loc[row,col] = df_ref.loc[row,col]
@@ -52,7 +50,7 @@ def excel_cmp(cols_polbnc, cols_ref, df_ref, df_polbnc, dfdiff):
         else:
             newRows.append(row)
 
-    for row in df_polbnc.index:
+    for row in dfdiff.index:
         if row not in df_ref.index:
             droppedRows.append(row)
             dfdiff = dfdiff.append(df_polbnc.loc[row,:])
@@ -105,24 +103,15 @@ def excel_cmp(cols_polbnc, cols_ref, df_ref, df_polbnc, dfdiff):
     writer.save()
     print('\nDone.\n')
 
+temp = t.txt_excel()
 
-path_polbnc = Path('POLBNC_sample.xlsx')
-path_bil = Path('BIL_sample.xlsx')
-path_pol = Path('POL_sample.xlsx')
+col_rename(t.str_bil, t.index_col_bil)
+# print('--->',t.cols_pbc)
+# print('--->',cols_bil)
+# print('--->',t.dfbil)
+# print('--->',t.dfdf)
+# print('--->',t.df_pbc)
+excel_cmp(t.cols_pbc, cols_bil, t.dfbil, t.dfdf, t.df_pbc)
 
-# get index col from data
-dfpbc = pd.read_excel(path_polbnc)
-dfbil = pd.read_excel(path_bil)
-dfpol = pd.read_excel(path_pol)
-index_col_pbc = dfpbc.columns[7]
-index_col_bil = dfbil.columns[1]
-index_col_pol = dfpol.columns[5]
-
-print('\nIndex column: {}'.format(index_col_pbc))
-print('\nIndex column: {}'.format(index_col_bil))
-print('\nIndex column: {}'.format(index_col_pol))
-
-excel_diff(path_polbnc, path_bil, index_col_pbc, index_col_bil)
-excel_cmp(cols_polbnc, cols_bil, df_bil, df_polbnc, dfdiff)
-excel_diff(path_polbnc, path_pol, index_col_pbc, index_col_pol)
-excel_cmp(cols_polbnc, cols_pol, df_pol, df_polbnc, dfdiff)
+col_rename(t.str_pol, t.index_col_pol)
+excel_cmp(t.cols_pbc, cols_pol, t.dfpol, t.dfdf, t.df_pbc)
