@@ -1,6 +1,5 @@
 import pandas as pd
 from pathlib import Path
-# from txt_to_xcl import txt_excel as t
 import txt_to_xcl as t
 
 
@@ -34,9 +33,6 @@ def excel_cmp(cols_polbnc, cols_ref, df_ref, dfdiff, df_polbnc):
     droppedRows = []
     newRows = []
     sharedCols = list(set(cols_polbnc).intersection(cols_ref))
-    print('sharedCols :', sharedCols)
-    print('cols_polbnc: ', cols_polbnc)
-    print('cols_ref: ', cols_ref)
 
     for row in dfdiff.index:
         if (row in dfdiff.index) and (row in df_ref.index):
@@ -62,15 +58,30 @@ def excel_cmp(cols_polbnc, cols_ref, df_ref, dfdiff, df_polbnc):
 
     # Save output and format
 #    fname = '{} vs {}.xlsx'.format(path_polbnc.stem,path_bil.stem)
+
+    return(dfdiff)
+
+
+def only_cells_with_red_text(dfdiff_r):
+    for row in dfdiff_r.index:
+        # for cols in dfdiff_r.index:
+        stra = dfdiff_r.loc[row].to_string(index=True)
+        # print('-------->', dfdiff_r.index)
+        if (stra.find('→') != -1):
+            continue
+            # print('->', stra)
+        else:
+            dfdiff_f = dfdiff_r.drop([dfdiff_r.index[row]])
+
     fname = 'POLBNC_compare.xlsx'
     writer = pd.ExcelWriter(fname, engine='xlsxwriter')
 
-    dfdiff.to_excel(writer, sheet_name='DIFF', index=True)
-#    df_bil.to_excel(writer, sheet_name=path_bil.stem, index=True)
-#    df_polbnc.to_excel(writer, sheet_name=path_polbnc.stem, index=True)
+    dfdiff_f.to_excel(writer, sheet_name='DIFF', index=False)
+    #    df_bil.to_excel(writer, sheet_name=path_bil.stem, index=True)
+    #    df_polbnc.to_excel(writer, sheet_name=path_polbnc.stem, index=True)
 
     # get xlsxwriter objects
-    workbook  = writer.book
+    workbook = writer.book
     worksheet = writer.sheets['DIFF']
     worksheet.hide_gridlines(2)
     worksheet.set_default_row(15)
@@ -82,22 +93,22 @@ def excel_cmp(cols_polbnc, cols_ref, df_ref, dfdiff, df_polbnc):
     cur_fmt = workbook.add_format({'align': 'center', 'num_format': '$#,##0.00'})
     perc_fmt = workbook.add_format({'align': 'center', 'num_format': '0%'})
     grey_fmt = workbook.add_format({'font_color': '#E0E0E0'})
-    highlight_fmt = workbook.add_format({'font_color': '#FF0000', 'bg_color':'#B1B3B3'})
-    new_fmt = workbook.add_format({'font_color': '#32CD32','bold':True})
+    highlight_fmt = workbook.add_format({'font_color': '#FF0000', 'bg_color': '#B1B3B3'})
+    new_fmt = workbook.add_format({'font_color': '#32CD32', 'bold': True})
 
     # set format over range
     ## highlight changed cells
     worksheet.conditional_format('A1:ZZ1000', {'type': 'text',
-                                            'criteria': 'containing',
-                                            'value':'→',
-                                            'format': highlight_fmt})
+                                               'criteria': 'containing',
+                                               'value': '→',
+                                               'format': highlight_fmt})
 
     # highlight new/changed rows
-    for row in range(dfdiff.shape[0]):
-        if row+1 in newRows:
-            worksheet.set_row(row+1, 15, new_fmt)
-        if row+1 in droppedRows:
-            worksheet.set_row(row+1, 15, grey_fmt)
+    for row in range(dfdiff_f.shape[0]):
+        if row + 1 in newRows:
+            worksheet.set_row(row + 1, 15, new_fmt)
+        if row + 1 in droppedRows:
+            worksheet.set_row(row + 1, 15, grey_fmt)
 
     # save
     writer.save()
@@ -106,12 +117,12 @@ def excel_cmp(cols_polbnc, cols_ref, df_ref, dfdiff, df_polbnc):
 temp = t.txt_excel()
 
 col_rename(t.str_bil, t.index_col_bil)
-# print('--->',t.cols_pbc)
-# print('--->',cols_bil)
-# print('--->',t.dfbil)
-# print('--->',t.dfdf)
-# print('--->',t.df_pbc)
-excel_cmp(t.cols_pbc, cols_bil, t.dfbil, t.dfdf, t.df_pbc)
+dfdiff_r = excel_cmp(t.cols_pbc, cols_bil, t.dfbil, t.dfdf, t.dfpbc)
 
 col_rename(t.str_pol, t.index_col_pol)
-excel_cmp(t.cols_pbc, cols_pol, t.dfpol, t.dfdf, t.df_pbc)
+dfdiff_r = excel_cmp(t.cols_pbc, cols_pol, t.dfpol, t.dfdf, t.dfpbc)
+
+
+only_cells_with_red_text(dfdiff_r)
+
+
