@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import txt_to_xcl as t
+# import cr_gui
 
 
 def col_rename(typ_ref, index_col_ref):
@@ -114,15 +115,16 @@ def only_cells_with_red_text(dfdiff_r):
     writer.save()
     print('\nDone.\n')
 
-temp = t.txt_excel()
+# cr_gui()
+# temp = t.txt_excel()
 
-col_rename(t.str_bil, t.index_col_bil)
-dfdiff_r = excel_cmp(t.cols_pbc, cols_bil, t.dfbil, t.dfdf, t.dfpbc)
+# col_rename(t.str_bil, t.index_col_bil)
+# dfdiff_r = excel_cmp(t.cols_pbc, cols_bil, t.dfbil, t.dfdf, t.dfpbc)
+#
+# col_rename(t.str_pol, t.index_col_pol)
+# dfdiff_r = excel_cmp(t.cols_pbc, cols_pol, t.dfpol, dfdiff_r, t.dfpbc)
 
-col_rename(t.str_pol, t.index_col_pol)
-dfdiff_r = excel_cmp(t.cols_pbc, cols_pol, t.dfpol, t.dfdf, t.dfpbc)
 
-
-only_cells_with_red_text(dfdiff_r)
+# only_cells_with_red_text(dfdiff_r)
 
 
