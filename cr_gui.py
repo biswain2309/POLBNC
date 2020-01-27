@@ -20,7 +20,7 @@ def copy_src(var_lst):
         # src = pathlib.PurePath(inp_path)
         print('Source path :', src)
         # head,tail = path.split(src)
-        path_dst = "/OSS/POLBNC"
+        path_dst = "/Code repos/POLBNC/"
         dst = path.realpath(path_dst)
         print('dest path :', dst)
         print("Source file path :", src)
@@ -37,6 +37,8 @@ def copy_src(var_lst):
 
 
 root = tk.Tk()
+root.title('PyPolCo')
+root.geometry('500x150')
 
 # root.withdraw()
 
@@ -48,16 +50,18 @@ var1 = tk.StringVar()
 var2 = tk.StringVar()
 var3 = tk.StringVar()
 
-label1 = tk.Label(root,
-                     text="Enter location of POL file:").grid(row=0)
+label1 = tk.Label(root, text="Enter location of POL file:",relief='flat', width=25, anchor='w').grid(row=0,column=0)
+# label1.configure()
 label2 = tk.Label(root,
-                     text="Enter location of BIL file:").grid(row=1)
+                     text="Enter location of BIL file:",relief='flat', width=25, anchor='w').grid(row=1,column=0)
+# label2.place(x=80, y=130)
 label3 = tk.Label(root,
-                      text="Enter location of POLBNC file:").grid(row=2)
+                      text="Enter location of POLBNC file:",relief='flat', width=25, anchor='w').grid(row=2,column=0)
+# label3.place(x=70, y=140)
 
-e1 = tk.Entry(root, textvariable = var1)
-e2 = tk.Entry(root, textvariable = var2)
-e3 = tk.Entry(root, textvariable = var3)
+e1 = tk.Entry(root, textvariable = var1, width=50)
+e2 = tk.Entry(root, textvariable = var2, width=50)
+e3 = tk.Entry(root, textvariable = var3, width=50)
 
 e1.grid(row=0, column=1)
 e2.grid(row=1, column=1)
@@ -65,7 +69,7 @@ e3.grid(row=2, column=1)
 
 copy_src = partial(copy_src, [var1, var2, var3])
 
-button = tk.Button(root, text = "Submit", command=copy_src).grid(row=3)
+button = tk.Button(root, text = "Submit", command=copy_src).place(x=225,y=100)
 # os.system('allcomp.py')
 root.mainloop()
 
